@@ -1,0 +1,2128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#0b1220"
+    >
+
+    <meta
+        name="description"
+        content="A gestational age and estimated due date calculator."
+    >
+
+    <title>POG Gestational Calculator</title>
+
+    <style>
+        /* =====================================
+           1. GLOBAL VARIABLES
+        ===================================== */
+
+        :root {
+            --bg: #080f1d;
+            --surface: #111c2e;
+            --surface-light: #18263b;
+            --border: #293951;
+
+            --primary: #7c9cff;
+            --primary-hover: #9bb2ff;
+
+            --text: #f1f5ff;
+            --muted: #a0aec4;
+
+            --success: #65d6a3;
+            --warning: #ffc66d;
+            --danger: #ff8585;
+
+            --radius: 18px;
+        }
+
+        /* =====================================
+           2. RESET AND BASE STYLES
+        ===================================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            padding: 24px 16px;
+
+            background:
+                radial-gradient(
+                    circle at top,
+                    #162544 0%,
+                    var(--bg) 55%
+                );
+
+            color: var(--text);
+
+            font-family:
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            line-height: 1.5;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: 3px solid var(--primary);
+            outline-offset: 3px;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 540px;
+
+            margin: 0 auto;
+        }
+
+        /* =====================================
+           3. HEADER
+        ===================================== */
+
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 62px;
+            height: 62px;
+
+            margin-bottom: 12px;
+
+            border-radius: 20px;
+
+            background: #24395e;
+
+            font-size: 30px;
+        }
+
+        .header h1 {
+            margin: 0;
+
+            font-size: clamp(25px, 6vw, 32px);
+            letter-spacing: -0.8px;
+        }
+
+        .header p {
+            margin: 8px 0 0;
+
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+
+            margin-top: 12px;
+            padding: 5px 10px;
+
+            border: 1px solid var(--border);
+            border-radius: 999px;
+
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* =====================================
+           4. CARDS
+        ===================================== */
+
+        .card {
+            margin-bottom: 18px;
+            padding: 22px;
+
+            background: var(--surface);
+
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .card-title {
+            margin: 0 0 18px;
+
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        /* =====================================
+           5. FORM ELEMENTS
+        ===================================== */
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+        .field:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: #dce5f5;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        input,
+        select {
+            width: 100%;
+            min-height: 48px;
+
+            padding: 12px;
+
+            color: var(--text);
+            background: var(--surface-light);
+
+            border: 1px solid var(--border);
+            border-radius: 11px;
+        }
+
+        input[type="date"] {
+            color-scheme: dark;
+        }
+
+        input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .hint {
+            margin: 6px 0 0;
+
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* =====================================
+           6. BUTTONS
+        ===================================== */
+
+        .button-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+
+            margin-top: 22px;
+        }
+
+        .button {
+            min-height: 48px;
+
+            padding: 12px 16px;
+
+            border: none;
+            border-radius: 11px;
+
+            font-weight: 700;
+
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .button:active {
+            transform: scale(0.98);
+        }
+
+        .button-primary {
+            background: var(--primary);
+            color: #08101f;
+        }
+
+        .button-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .button-secondary {
+            background: var(--surface-light);
+            color: var(--text);
+
+            border: 1px solid var(--border);
+        }
+
+        .button-secondary:hover {
+            background: #22334d;
+        }
+
+        .button-full {
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        /* =====================================
+           7. MESSAGES
+        ===================================== */
+
+        .message {
+            display: none;
+
+            margin-top: 16px;
+            padding: 12px 14px;
+
+            border-radius: 10px;
+
+            font-size: 13px;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message-error {
+            color: #ffd5d5;
+            background: #46252d;
+
+            border: 1px solid #81414d;
+        }
+
+        .message-success {
+            color: #c9ffe5;
+            background: #173c32;
+
+            border: 1px solid #286b55;
+        }
+
+        /* =====================================
+           8. EMPTY STATE
+        ===================================== */
+
+        .empty-state {
+            padding: 26px 16px;
+
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .empty-icon {
+            margin-bottom: 10px;
+            font-size: 34px;
+        }
+
+        .empty-state h2 {
+            margin: 0 0 8px;
+
+            color: var(--text);
+            font-size: 17px;
+        }
+
+        .empty-state p {
+            margin: 0;
+            font-size: 13px;
+        }
+
+        /* =====================================
+           9. RESULTS
+        ===================================== */
+
+        .results {
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+
+            padding: 26px 22px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #263e70,
+                    #182541
+                );
+
+            border: 1px solid #3d5687;
+            border-radius: var(--radius);
+
+            text-align: center;
+        }
+
+        .hero-label {
+            margin: 0 0 10px;
+
+            color: #c4d2f7;
+
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+
+        .pog-value {
+            margin: 0;
+
+            font-size: clamp(38px, 10vw, 54px);
+            font-weight: 800;
+
+            letter-spacing: -2px;
+            line-height: 1.2;
+        }
+
+        .pog-unit {
+            margin-top: 8px;
+
+            color: #c4d2f7;
+            font-size: 14px;
+        }
+
+        .gestation-status {
+            display: inline-block;
+
+            margin-top: 18px;
+            padding: 6px 12px;
+
+            border-radius: 999px;
+
+            color: #dce5ff;
+            background: #344c7a;
+
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+
+            margin-top: 14px;
+        }
+
+        .result-card {
+            min-width: 0;
+
+            padding: 17px;
+
+            background: var(--surface);
+
+            border: 1px solid var(--border);
+            border-radius: 15px;
+        }
+
+        .result-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .result-label {
+            margin-bottom: 9px;
+
+            color: var(--muted);
+
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .result-value {
+            font-size: 18px;
+            font-weight: 750;
+
+            overflow-wrap: anywhere;
+        }
+
+        .result-description {
+            margin-top: 6px;
+
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .trimester-pill {
+            display: inline-block;
+
+            padding: 5px 9px;
+
+            border-radius: 7px;
+
+            color: #d7e2ff;
+            background: #293c61;
+
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .milestone-title {
+            margin: 0 0 5px;
+
+            font-size: 15px;
+        }
+
+        .milestone-description {
+            margin: 0;
+
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .progress-track {
+            height: 7px;
+            overflow: hidden;
+
+            margin-top: 14px;
+
+            background: #293951;
+            border-radius: 99px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+
+            background: var(--primary);
+            border-radius: 99px;
+
+            transition: width 0.3s ease;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+
+            margin-top: 8px;
+
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        /* =====================================
+           10. FOOTER
+        ===================================== */
+
+        .medical-note {
+            margin: 20px 4px 0;
+
+            color: var(--muted);
+            font-size: 11px;
+
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        .footer {
+            margin-top: 25px;
+
+            color: #71819a;
+            font-size: 11px;
+
+            text-align: center;
+        }
+
+        /* =====================================
+           11. RESPONSIVE DESIGN
+        ===================================== */
+
+        @media (max-width: 380px) {
+            body {
+                padding: 18px 10px;
+            }
+
+            .card {
+                padding: 17px;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .result-card.full-width {
+                grid-column: auto;
+            }
+
+            .field-grid {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="app">
+
+        <!-- HEADER -->
+
+        <header class="header">
+
+            <div class="logo" aria-hidden="true">
+                🤰
+            </div>
+
+            <h1>POG Calculator</h1>
+
+            <p>
+                Gestational age and estimated due date
+            </p>
+
+            <div class="badge">
+                PREGNANCY DATE CALCULATOR
+            </div>
+
+        </header>
+
+
+        <!-- INPUT CARD -->
+
+        <section class="card">
+
+            <h2 class="card-title">
+                Pregnancy Details
+            </h2>
+
+
+            <!-- DATING METHOD -->
+
+            <div class="field">
+
+                <label for="datingMethod">
+                    Dating Method
+                </label>
+
+                <select id="datingMethod">
+
+                    <option value="lmp">
+                        Last Menstrual Period (LMP)
+                    </option>
+
+                    <option value="ultrasound">
+                        Ultrasound Dating
+                    </option>
+
+                </select>
+
+                <p class="hint">
+                    Select the method used to estimate gestational age.
+                </p>
+
+            </div>
+
+
+            <!-- LMP INPUT -->
+
+            <div id="lmpSection">
+
+                <div class="field">
+
+                    <label for="lmpDate">
+                        First Day of Last Menstrual Period
+                    </label>
+
+                    <input
+                        type="date"
+                        id="lmpDate"
+                        autocomplete="off"
+                    >
+
+                    <p class="hint">
+                        Enter the first day of your last menstrual period.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- ULTRASOUND INPUTS -->
+
+            <div id="ultrasoundSection" class="hidden">
+
+                <div class="field">
+
+                    <label for="scanDate">
+                        Ultrasound Examination Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="scanDate"
+                        autocomplete="off"
+                    >
+
+                </div>
+
+
+                <div class="field-grid">
+
+                    <div class="field">
+
+                        <label for="scanWeeks">
+                            Gestational Age — Weeks
+                        </label>
+
+                        <input
+                            type="number"
+                            id="scanWeeks"
+                            min="0"
+                            max="41"
+                            step="1"
+                            inputmode="numeric"
+                            placeholder="e.g. 10"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="scanDays">
+                            Additional Days
+                        </label>
+
+                        <select id="scanDays">
+
+                            <option value="0">0 days</option>
+                            <option value="1">1 day</option>
+                            <option value="2">2 days</option>
+                            <option value="3">3 days</option>
+                            <option value="4">4 days</option>
+                            <option value="5">5 days</option>
+                            <option value="6">6 days</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <p class="hint">
+                    Enter the gestational age recorded on the ultrasound
+                    report, not an age you have independently estimated.
+                </p>
+
+            </div>
+
+
+            <!-- TARGET DATE -->
+
+            <div class="field">
+
+                <label for="targetDate">
+                    Calculate Gestational Age On
+                </label>
+
+                <input
+                    type="date"
+                    id="targetDate"
+                    autocomplete="off"
+                >
+
+                <p class="hint">
+                    Defaults to today. You can select another date.
+                </p>
+
+            </div>
+
+
+            <!-- FORM BUTTONS -->
+
+            <div class="button-row">
+
+                <button
+                    type="button"
+                    class="button button-primary"
+                    id="calculateButton"
+                >
+                    Calculate POG
+                </button>
+
+                <button
+                    type="button"
+                    class="button button-secondary"
+                    id="resetButton"
+                >
+                    Reset
+                </button>
+
+            </div>
+
+
+            <!-- ERROR / SUCCESS MESSAGES -->
+
+            <div
+                id="message"
+                class="message"
+                role="status"
+                aria-live="polite"
+            ></div>
+
+        </section>
+
+
+        <!-- EMPTY STATE -->
+
+        <section
+            id="emptyState"
+            class="card empty-state"
+        >
+
+            <div class="empty-icon" aria-hidden="true">
+                📅
+            </div>
+
+            <h2>Ready to calculate?</h2>
+
+            <p>
+                Enter the pregnancy details above to see
+                the gestational age and estimated due date.
+            </p>
+
+        </section>
+
+
+        <!-- RESULTS -->
+
+        <section
+            id="results"
+            class="results"
+            aria-live="polite"
+        >
+
+            <!-- MAIN POG -->
+
+            <div class="hero">
+
+                <p class="hero-label">
+                    Period of Gestation
+                </p>
+
+                <p
+                    id="pogValue"
+                    class="pog-value"
+                >
+                    --
+                </p>
+
+                <div
+                    id="pogUnit"
+                    class="pog-unit"
+                >
+                    Weeks + Days
+                </div>
+
+                <div
+                    id="gestationStatus"
+                    class="gestation-status"
+                >
+                    Calculated gestational age
+                </div>
+
+            </div>
+
+
+            <!-- RESULT CARDS -->
+
+            <div class="results-grid">
+
+
+                <!-- EDD -->
+
+                <article class="result-card">
+
+                    <div class="result-label">
+                        Estimated Due Date
+                    </div>
+
+                    <div
+                        id="eddValue"
+                        class="result-value"
+                    >
+                        --
+                    </div>
+
+                    <div class="result-description">
+                        Estimated 40-week date
+                    </div>
+
+                </article>
+
+
+                <!-- TRIMESTER -->
+
+                <article class="result-card">
+
+                    <div class="result-label">
+                        Trimester
+                    </div>
+
+                    <div>
+                        <span
+                            id="trimesterValue"
+                            class="trimester-pill"
+                        >
+                            --
+                        </span>
+                    </div>
+
+                    <div
+                        id="trimesterDescription"
+                        class="result-description"
+                    >
+                        --
+                    </div>
+
+                </article>
+
+
+                <!-- TOTAL DAYS -->
+
+                <article class="result-card">
+
+                    <div class="result-label">
+                        Gestational Age
+                    </div>
+
+                    <div
+                        id="totalDaysValue"
+                        class="result-value"
+                    >
+                        --
+                    </div>
+
+                    <div class="result-description">
+                        Total elapsed gestational days
+                    </div>
+
+                </article>
+
+
+                <!-- DAYS TO EDD -->
+
+                <article class="result-card">
+
+                    <div class="result-label">
+                        Time Until EDD
+                    </div>
+
+                    <div
+                        id="remainingValue"
+                        class="result-value"
+                    >
+                        --
+                    </div>
+
+                    <div
+                        id="remainingDescription"
+                        class="result-description"
+                    >
+                        --
+                    </div>
+
+                </article>
+
+
+                <!-- MILESTONE -->
+
+                <article class="result-card full-width">
+
+                    <div class="result-label">
+                        Gestational Milestone
+                    </div>
+
+                    <h3
+                        id="milestoneTitle"
+                        class="milestone-title"
+                    >
+                        --
+                    </h3>
+
+                    <p
+                        id="milestoneDescription"
+                        class="milestone-description"
+                    >
+                        --
+                    </p>
+
+                    <div
+                        class="progress-track"
+                        role="progressbar"
+                        id="progressTrack"
+                        aria-label="Progress through a 40-week pregnancy"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-valuenow="0"
+                    >
+
+                        <div
+                            id="progressBar"
+                            class="progress-bar"
+                        ></div>
+
+                    </div>
+
+                    <div class="progress-label">
+
+                        <span>
+                            0 weeks
+                        </span>
+
+                        <span id="progressPercent">
+                            0% of 40 weeks
+                        </span>
+
+                        <span>
+                            40 weeks
+                        </span>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+
+            <!-- COPY BUTTON -->
+
+            <button
+                type="button"
+                id="copyButton"
+                class="button button-primary button-full"
+            >
+                Copy Results
+            </button>
+
+
+            <div
+                id="copyMessage"
+                class="message"
+                role="status"
+                aria-live="polite"
+            ></div>
+
+        </section>
+
+
+        <!-- MEDICAL DISCLAIMER -->
+
+        <p class="medical-note">
+            <strong>Important:</strong> This calculator provides
+            an estimate for educational and informational purposes.
+            LMP-based calculations assume a conventional 280-day
+            pregnancy dating framework. Menstrual-cycle variability,
+            ultrasound findings, and the clinician-established
+            estimated due date can affect pregnancy dating.
+            This tool does not replace professional antenatal care.
+        </p>
+
+
+        <footer class="footer">
+            POG Calculator · Educational use only
+        </footer>
+
+    </main>
+
+
+    <script>
+
+        /* =====================================
+           1. GET HTML ELEMENTS
+        ===================================== */
+
+        const datingMethod =
+            document.getElementById("datingMethod");
+
+        const lmpSection =
+            document.getElementById("lmpSection");
+
+        const ultrasoundSection =
+            document.getElementById("ultrasoundSection");
+
+        const lmpDate =
+            document.getElementById("lmpDate");
+
+        const scanDate =
+            document.getElementById("scanDate");
+
+        const scanWeeks =
+            document.getElementById("scanWeeks");
+
+        const scanDays =
+            document.getElementById("scanDays");
+
+        const targetDate =
+            document.getElementById("targetDate");
+
+        const calculateButton =
+            document.getElementById("calculateButton");
+
+        const resetButton =
+            document.getElementById("resetButton");
+
+        const message =
+            document.getElementById("message");
+
+        const emptyState =
+            document.getElementById("emptyState");
+
+        const results =
+            document.getElementById("results");
+
+        const pogValue =
+            document.getElementById("pogValue");
+
+        const pogUnit =
+            document.getElementById("pogUnit");
+
+        const gestationStatus =
+            document.getElementById("gestationStatus");
+
+        const eddValue =
+            document.getElementById("eddValue");
+
+        const trimesterValue =
+            document.getElementById("trimesterValue");
+
+        const trimesterDescription =
+            document.getElementById("trimesterDescription");
+
+        const totalDaysValue =
+            document.getElementById("totalDaysValue");
+
+        const remainingValue =
+            document.getElementById("remainingValue");
+
+        const remainingDescription =
+            document.getElementById("remainingDescription");
+
+        const milestoneTitle =
+            document.getElementById("milestoneTitle");
+
+        const milestoneDescription =
+            document.getElementById("milestoneDescription");
+
+        const progressTrack =
+            document.getElementById("progressTrack");
+
+        const progressBar =
+            document.getElementById("progressBar");
+
+        const progressPercent =
+            document.getElementById("progressPercent");
+
+        const copyButton =
+            document.getElementById("copyButton");
+
+        const copyMessage =
+            document.getElementById("copyMessage");
+
+
+        /* =====================================
+           2. DATE UTILITIES
+
+           These functions use UTC calendar dates
+           to avoid timezone-related day shifts.
+        ===================================== */
+
+        const DAY_MS = 24 * 60 * 60 * 1000;
+
+        const DAYS_IN_PREGNANCY = 280;
+
+
+        function parseDate(value) {
+
+            if (!value) {
+                return null;
+            }
+
+            const parts = value.split("-").map(Number);
+
+            if (parts.length !== 3) {
+                return null;
+            }
+
+            const [year, month, day] = parts;
+
+            if (
+                !Number.isInteger(year) ||
+                !Number.isInteger(month) ||
+                !Number.isInteger(day)
+            ) {
+                return null;
+            }
+
+            const date = new Date(
+                Date.UTC(year, month - 1, day)
+            );
+
+            // Reject impossible dates such as February 31.
+
+            if (
+                date.getUTCFullYear() !== year ||
+                date.getUTCMonth() !== month - 1 ||
+                date.getUTCDate() !== day
+            ) {
+                return null;
+            }
+
+            return date;
+        }
+
+
+        function formatDate(date) {
+
+            return new Intl.DateTimeFormat(
+                "en-US",
+                {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                    timeZone: "UTC"
+                }
+            ).format(date);
+
+        }
+
+
+        function formatInputDate(date) {
+
+            const year = date.getUTCFullYear();
+
+            const month = String(
+                date.getUTCMonth() + 1
+            ).padStart(2, "0");
+
+            const day = String(
+                date.getUTCDate()
+            ).padStart(2, "0");
+
+            return `${year}-${month}-${day}`;
+
+        }
+
+
+        function addDays(date, numberOfDays) {
+
+            const result = new Date(date.getTime());
+
+            result.setUTCDate(
+                result.getUTCDate() + numberOfDays
+            );
+
+            return result;
+
+        }
+
+
+        function differenceInDays(startDate, endDate) {
+
+            return Math.round(
+                (endDate.getTime() - startDate.getTime()) /
+                DAY_MS
+            );
+
+        }
+
+
+        function getToday() {
+
+            const now = new Date();
+
+            return new Date(
+                Date.UTC(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate()
+                )
+            );
+
+        }
+
+
+        /* =====================================
+           3. MESSAGES AND RESULT VISIBILITY
+        ===================================== */
+
+        function showMessage(text, type = "error") {
+
+            message.textContent = text;
+
+            message.className =
+                `message show message-${type}`;
+
+        }
+
+
+        function hideMessage() {
+
+            message.textContent = "";
+            message.className = "message";
+
+        }
+
+
+        function showCopyMessage(text, type = "success") {
+
+            copyMessage.textContent = text;
+
+            copyMessage.className =
+                `message show message-${type}`;
+
+        }
+
+
+        function hideCopyMessage() {
+
+            copyMessage.textContent = "";
+            copyMessage.className = "message";
+
+        }
+
+
+        function clearResults() {
+
+            results.classList.remove("show");
+
+            emptyState.classList.remove("hidden");
+
+            hideCopyMessage();
+
+        }
+
+
+        /* =====================================
+           4. DATING METHOD SWITCH
+        ===================================== */
+
+        function updateDatingMethod() {
+
+            hideMessage();
+            clearResults();
+
+            if (datingMethod.value === "lmp") {
+
+                lmpSection.classList.remove("hidden");
+
+                ultrasoundSection.classList.add("hidden");
+
+            } else {
+
+                lmpSection.classList.add("hidden");
+
+                ultrasoundSection.classList.remove("hidden");
+
+            }
+
+        }
+
+
+        /* =====================================
+           5. GET THE PREGNANCY STARTING POINT
+
+           LMP method:
+           LMP is day 0 of gestational dating.
+
+           Ultrasound method:
+           Reconstruct the equivalent 280-day
+           dating origin from the reported GA.
+        ===================================== */
+
+        function getDatingAnchor() {
+
+            if (datingMethod.value === "lmp") {
+
+                const lmp = parseDate(lmpDate.value);
+
+                if (!lmp) {
+
+                    throw new Error(
+                        "Please enter a valid first day of the last menstrual period."
+                    );
+
+                }
+
+                return {
+                    anchorDate: lmp,
+                    method: "LMP-based dating"
+                };
+
+            }
+
+
+            const ultrasoundDate =
+                parseDate(scanDate.value);
+
+            if (!ultrasoundDate) {
+
+                throw new Error(
+                    "Please enter a valid ultrasound examination date."
+                );
+
+            }
+
+
+            if (
+                scanWeeks.value.trim() === "" ||
+                !Number.isInteger(Number(scanWeeks.value))
+            ) {
+
+                throw new Error(
+                    "Please enter the gestational age in whole weeks."
+                );
+
+            }
+
+
+            const weeks = Number(scanWeeks.value);
+
+            const days = Number(scanDays.value);
+
+            if (
+                weeks < 0 ||
+                weeks > 41 ||
+                days < 0 ||
+                days > 6
+            ) {
+
+                throw new Error(
+                    "Please enter a valid gestational age."
+                );
+
+            }
+
+
+            const gestationalAgeAtScan =
+                weeks * 7 + days;
+
+
+            if (
+                gestationalAgeAtScan >= DAYS_IN_PREGNANCY
+            ) {
+
+                throw new Error(
+                    "The entered gestational age must be less than 40 weeks for this calculator."
+                );
+
+            }
+
+
+            /*
+                Example:
+
+                Ultrasound GA = 10 weeks + 0 days
+                GA at scan = 70 days
+
+                Equivalent dating origin =
+                scan date - 70 days
+
+                Estimated due date =
+                scan date + 210 days
+            */
+
+            const equivalentStartDate = addDays(
+                ultrasoundDate,
+                -gestationalAgeAtScan
+            );
+
+
+            return {
+                anchorDate: equivalentStartDate,
+                method: "Ultrasound-based dating"
+            };
+
+        }
+
+
+        /* =====================================
+           6. TRIMESTER CALCULATION
+        ===================================== */
+
+        function getTrimester(totalDays) {
+
+            const weeks = Math.floor(totalDays / 7);
+
+            /*
+                Commonly used boundaries:
+
+                First trimester: before 14+0
+                Second trimester: 14+0 to 27+6
+                Third trimester: 28+0 onward
+            */
+
+            if (weeks < 14) {
+
+                return {
+                    name: "First Trimester",
+                    description: "Before 14 weeks"
+                };
+
+            }
+
+
+            if (weeks < 28) {
+
+                return {
+                    name: "Second Trimester",
+                    description: "14 weeks to 27 weeks + 6 days"
+                };
+
+            }
+
+
+            return {
+                name: "Third Trimester",
+                description: "28 weeks onward"
+            };
+
+        }
+
+
+        /* =====================================
+           7. MILESTONE CALCULATION
+        ===================================== */
+
+        function getMilestone(totalDays) {
+
+            const milestones = [
+
+                {
+                    days: 42,
+                    title: "6-week milestone",
+                    description:
+                        "Early pregnancy assessment may include confirmation of pregnancy location and viability when clinically indicated."
+                },
+
+                {
+                    days: 70,
+                    title: "10-week milestone",
+                    description:
+                        "Discuss appropriate antenatal screening and testing options with your healthcare professional."
+                },
+
+                {
+                    days: 98,
+                    title: "14-week milestone",
+                    description:
+                        "The second trimester begins at 14+0 under the trimester convention used by this calculator."
+                },
+
+                {
+                    days: 140,
+                    title: "20-week milestone",
+                    description:
+                        "The mid-pregnancy anatomy scan is commonly performed around this period, depending on local guidance."
+                },
+
+                {
+                    days: 196,
+                    title: "28-week milestone",
+                    description:
+                        "The third trimester begins at 28+0 under the trimester convention used by this calculator."
+                },
+
+                {
+                    days: 224,
+                    title: "32-week milestone",
+                    description:
+                        "Continue scheduled antenatal visits and follow your clinician's recommendations."
+                },
+
+                {
+                    days: 259,
+                    title: "37-week milestone",
+                    description:
+                        "Pregnancy has reached 37+0 weeks, commonly classified as early term."
+                },
+
+                {
+                    days: 266,
+                    title: "38-week milestone",
+                    description:
+                        "Continue monitoring fetal movement and follow your maternity team's advice."
+                },
+
+                {
+                    days: 280,
+                    title: "Estimated due date",
+                    description:
+                        "40+0 weeks is the conventional estimated due date, not a guaranteed delivery date."
+                }
+
+            ];
+
+
+            const nextMilestone = milestones.find(
+                milestone => milestone.days > totalDays
+            );
+
+
+            if (!nextMilestone) {
+
+                return {
+                    title: "40-week milestone passed",
+                    description:
+                        "The estimated due date has passed. Contact your maternity team for advice about ongoing care."
+                };
+
+            }
+
+
+            const remainingDays =
+                nextMilestone.days - totalDays;
+
+            const remainingWeeks =
+                Math.floor(remainingDays / 7);
+
+            const extraDays =
+                remainingDays % 7;
+
+
+            return {
+
+                title: nextMilestone.title,
+
+                description:
+                    `${nextMilestone.description} ` +
+                    `Milestone in ${remainingWeeks}+${extraDays} ` +
+                    `weeks/days from the selected date.`
+
+            };
+
+        }
+
+
+        /* =====================================
+           8. MAIN CALCULATION
+        ===================================== */
+
+        function calculatePOG() {
+
+            hideMessage();
+            hideCopyMessage();
+
+            /*
+                Clear old results before validating.
+
+                This prevents stale calculations from
+                remaining visible after invalid input.
+            */
+
+            clearResults();
+
+
+            try {
+
+                const target = parseDate(targetDate.value);
+
+                if (!target) {
+
+                    throw new Error(
+                        "Please select a valid calculation date."
+                    );
+
+                }
+
+
+                const {
+                    anchorDate,
+                    method
+                } = getDatingAnchor();
+
+
+                if (target < anchorDate) {
+
+                    throw new Error(
+                        "The calculation date cannot be earlier than the pregnancy dating origin."
+                    );
+
+                }
+
+
+                /*
+                    Total gestational days:
+
+                    LMP method:
+                    Days elapsed since LMP.
+
+                    Ultrasound method:
+                    Days elapsed since the reconstructed
+                    equivalent dating origin.
+                */
+
+                const totalDays = differenceInDays(
+                    anchorDate,
+                    target
+                );
+
+
+                if (totalDays < 0) {
+
+                    throw new Error(
+                        "The calculated gestational age is invalid."
+                    );
+
+                }
+
+
+                const weeks = Math.floor(
+                    totalDays / 7
+                );
+
+                const days = totalDays % 7;
+
+
+                /*
+                    Estimated due date:
+
+                    Dating origin + 280 days.
+                */
+
+                const edd = addDays(
+                    anchorDate,
+                    DAYS_IN_PREGNANCY
+                );
+
+
+                const daysUntilEDD = differenceInDays(
+                    target,
+                    edd
+                );
+
+
+                /* -----------------------------
+                   POG
+                ----------------------------- */
+
+                pogValue.textContent =
+                    `${weeks}+${days}`;
+
+                pogUnit.textContent =
+                    `${weeks} weeks and ${days} days`;
+
+
+                /* -----------------------------
+                   STATUS
+                ----------------------------- */
+
+                if (totalDays >= 294) {
+
+                    gestationStatus.textContent =
+                        "42 weeks or more";
+
+                } else if (totalDays >= 287) {
+
+                    gestationStatus.textContent =
+                        "41 weeks or more";
+
+                } else if (totalDays >= 280) {
+
+                    gestationStatus.textContent =
+                        "40 weeks or more";
+
+                } else if (totalDays >= 259) {
+
+                    gestationStatus.textContent =
+                        "Early term or later";
+
+                } else {
+
+                    gestationStatus.textContent =
+                        "Pregnancy dating estimate";
+
+                }
+
+
+                /* -----------------------------
+                   EDD
+                ----------------------------- */
+
+                eddValue.textContent =
+                    formatDate(edd);
+
+
+                /* -----------------------------
+                   TRIMESTER
+                ----------------------------- */
+
+                const trimester = getTrimester(
+                    totalDays
+                );
+
+                trimesterValue.textContent =
+                    trimester.name;
+
+                trimesterDescription.textContent =
+                    trimester.description;
+
+
+                /* -----------------------------
+                   TOTAL DAYS
+                ----------------------------- */
+
+                totalDaysValue.textContent =
+                    `${totalDays} days`;
+
+
+                /* -----------------------------
+                   DAYS REMAINING
+                ----------------------------- */
+
+                if (daysUntilEDD > 0) {
+
+                    remainingValue.textContent =
+                        `${daysUntilEDD} days`;
+
+                    remainingDescription.textContent =
+                        "Until the estimated due date";
+
+                } else if (daysUntilEDD === 0) {
+
+                    remainingValue.textContent =
+                        "Today";
+
+                    remainingDescription.textContent =
+                        "Estimated due date";
+
+                } else {
+
+                    remainingValue.textContent =
+                        `${Math.abs(daysUntilEDD)} days`;
+
+                    remainingDescription.textContent =
+                        "Past the estimated due date";
+
+                }
+
+
+                /* -----------------------------
+                   MILESTONE
+                ----------------------------- */
+
+                const milestone = getMilestone(
+                    totalDays
+                );
+
+                milestoneTitle.textContent =
+                    milestone.title;
+
+                milestoneDescription.textContent =
+                    milestone.description;
+
+
+                /* -----------------------------
+                   PROGRESS
+                ----------------------------- */
+
+                const progress = Math.min(
+                    100,
+                    Math.max(
+                        0,
+                        (totalDays / DAYS_IN_PREGNANCY) * 100
+                    )
+                );
+
+                progressBar.style.width =
+                    `${progress}%`;
+
+                progressPercent.textContent =
+                    `${progress.toFixed(1)}% of 40 weeks`;
+
+                progressTrack.setAttribute(
+                    "aria-valuenow",
+                    String(Math.round(progress))
+                );
+
+
+                /* -----------------------------
+                   SHOW RESULTS
+                ----------------------------- */
+
+                results.classList.add("show");
+
+                emptyState.classList.add("hidden");
+
+
+                showMessage(
+                    `Calculation completed using ${method.toLowerCase()}.`,
+                    "success"
+                );
+
+
+            } catch (error) {
+
+                clearResults();
+
+                showMessage(
+                    error.message ||
+                    "Unable to calculate gestational age. Please check your inputs."
+                );
+
+            }
+
+        }
+
+
+        /* =====================================
+           9. RESET
+        ===================================== */
+
+        function resetCalculator() {
+
+            datingMethod.value = "lmp";
+
+            lmpDate.value = "";
+
+            scanDate.value = "";
+
+            scanWeeks.value = "";
+
+            scanDays.value = "0";
+
+            targetDate.value =
+                formatInputDate(getToday());
+
+            updateDatingMethod();
+
+            hideMessage();
+
+            hideCopyMessage();
+
+            clearResults();
+
+        }
+
+
+        /* =====================================
+           10. COPY RESULTS
+        ===================================== */
+
+        async function copyResults() {
+
+            if (!results.classList.contains("show")) {
+
+                showCopyMessage(
+                    "Calculate the results before copying.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const summary = [
+
+                "POG GESTATIONAL CALCULATOR",
+
+                `Dating method: ${datingMethod.value === "lmp"
+                    ? "LMP-based"
+                    : "Ultrasound-based"}`,
+
+                `Gestational age: ${pogValue.textContent} (${pogUnit.textContent})`,
+
+                `Estimated due date: ${eddValue.textContent}`,
+
+                `Trimester: ${trimesterValue.textContent}`,
+
+                `Total gestational days: ${totalDaysValue.textContent}`,
+
+                `Time until EDD: ${remainingValue.textContent}`,
+
+                `Milestone: ${milestoneTitle.textContent}`,
+
+                "",
+
+                "Educational estimate only. Confirm pregnancy dating with a qualified healthcare professional."
+
+            ].join("\n");
+
+
+            try {
+
+                await navigator.clipboard.writeText(
+                    summary
+                );
+
+                showCopyMessage(
+                    "Results copied to clipboard.",
+                    "success"
+                );
+
+            } catch (error) {
+
+                /*
+                    Fallback for browsers where the
+                    Clipboard API is unavailable.
+                */
+
+                const textarea =
+                    document.createElement("textarea");
+
+                textarea.value = summary;
+
+                textarea.style.position = "fixed";
+                textarea.style.opacity = "0";
+
+                document.body.appendChild(textarea);
+
+                textarea.select();
+
+                const copied =
+                    document.execCommand("copy");
+
+                textarea.remove();
+
+
+                if (copied) {
+
+                    showCopyMessage(
+                        "Results copied to clipboard.",
+                        "success"
+                    );
+
+                } else {
+
+                    showCopyMessage(
+                        "Automatic copying failed. Please copy the results manually.",
+                        "error"
+                    );
+
+                }
+
+            }
+
+        }
+
+
+        /* =====================================
+           11. EVENT LISTENERS
+        ===================================== */
+
+        datingMethod.addEventListener(
+            "change",
+            updateDatingMethod
+        );
+
+
+        calculateButton.addEventListener(
+            "click",
+            calculatePOG
+        );
+
+
+        resetButton.addEventListener(
+            "click",
+            resetCalculator
+        );
+
+
+        copyButton.addEventListener(
+            "click",
+            copyResults
+        );
+
+
+        /*
+            If the user changes any input after
+            calculating, hide the old results.
+        */
+
+        const inputElements = [
+
+            lmpDate,
+            scanDate,
+            scanWeeks,
+            scanDays,
+            targetDate
+
+        ];
+
+
+        inputElements.forEach(element => {
+
+            element.addEventListener(
+                "input",
+                () => {
+
+                    hideMessage();
+
+                    clearResults();
+
+                }
+            );
+
+            element.addEventListener(
+                "change",
+                () => {
+
+                    hideMessage();
+
+                    clearResults();
+
+                }
+            );
+
+        });
+
+
+        /* =====================================
+           12. INITIALIZE
+        ===================================== */
+
+        targetDate.value =
+            formatInputDate(getToday());
+
+        updateDatingMethod();
+
+    </script>
+
+</body>
+                                                     </html>
